@@ -7,15 +7,22 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
+        policy.SetIsOriginAllowed(_ => true)    // Vẫn giữ để sếp test local
+                                                // Cho phép Web chạy trên Port 80 của EC2
+
+               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
+
 });
 
-// Thêm SignalR
-builder.Services.AddSignalR().AddMessagePackProtocol();
+// Thêm SignalR VÀ CẤU HÌNH TĂNG GIỚI HẠN DỮ LIỆU LÊN 10MB
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024; // Mở rộng giới hạn nhận lên 10MB
+    options.EnableDetailedErrors = true; // Bật thông báo lỗi chi tiết
+}).AddMessagePackProtocol();
 
 var app = builder.Build();
 
